@@ -23,7 +23,7 @@ async fn main() {
         last_render_time = get_time();
 
         if screen_width().ne(&sw) || screen_height().ne(&sh) || balls.len() == 0 {
-            balls = (0..2).map(|_| Ball::new_random()).collect();
+            balls = (0..5).map(|_| Ball::new_random()).collect();
             sw = screen_width();
             sh = screen_height();
         }
@@ -34,6 +34,8 @@ async fn main() {
         });
 
         balls.iter_mut().for_each(|ball| ball.update(dt));
+        Ball::handle_balls_collision(&mut balls);
+        balls.iter().for_each(|ball| ball.draw());
 
         next_frame().await
     }

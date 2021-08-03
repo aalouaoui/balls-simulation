@@ -45,20 +45,32 @@ impl Ball {
         self.velocity.x += self.acceleration.x * dt;
         self.velocity.y += self.acceleration.y * dt;
         self.handle_bound_collision();
-        self.draw();
     }
 
     fn handle_bound_collision(&mut self) {
         let max_x = screen_width() - self.radius;
         let max_y = screen_height() - self.radius;
-        self.fill = false;
         if self.x < self.radius || self.x > max_x {
             self.velocity.x = -self.velocity.x;
-            self.fill = true;
         }
         if self.y < self.radius || self.y > max_y {
             self.velocity.y = -self.velocity.y;
-            self.fill = true;
+        }
+    }
+
+    pub fn collide_with(&self, other: &Self) -> bool {
+        vec2(self.x, self.y).distance(vec2(other.x, other.y)) < self.radius + other.radius
+    }
+
+    pub fn handle_balls_collision(balls: &mut Vec<Ball>) {
+        balls.iter_mut().for_each(|ball| ball.fill = false);
+        for i in 0..balls.len() - 1 {
+            for j in i + 1..balls.len() {
+                if balls[i].collide_with(&balls[j]) {
+                    balls[i].fill = true;
+                    balls[j].fill = true;
+                }
+            }
         }
     }
 
