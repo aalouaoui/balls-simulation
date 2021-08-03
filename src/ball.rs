@@ -1,4 +1,8 @@
-use macroquad::{color::hsl_to_rgb, prelude::*};
+use macroquad::{
+    color::hsl_to_rgb,
+    prelude::{draw_poly_lines, screen_height, screen_width, vec2, Color, Vec2},
+};
+use rand::Rng;
 
 pub struct Ball {
     x: f32,
@@ -24,10 +28,11 @@ impl Ball {
     }
 
     pub fn new_random() -> Self {
-        let radius = rand::gen_range(0.05, 0.1) * screen_height().min(screen_width());
-        let x = rand::gen_range(radius, screen_width() - radius);
-        let y = rand::gen_range(radius, screen_height() - radius);
-        let color = hsl_to_rgb(rand::gen_range(0.0, 1.0), 0.5, 0.5);
+        let mut rng = rand::thread_rng();
+        let radius = rng.gen_range(0.05..0.1) * screen_height().min(screen_width());
+        let x = rng.gen_range(radius..screen_width() - radius);
+        let y = rng.gen_range(radius..screen_height() - radius);
+        let color = hsl_to_rgb(rng.gen_range(0.0..1.0), 0.5, 0.5);
         Self::new(vec2(x, y), radius, color)
     }
 
