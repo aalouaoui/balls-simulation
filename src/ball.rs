@@ -1,6 +1,6 @@
 use macroquad::{
     color::hsl_to_rgb,
-    prelude::{draw_poly_lines, screen_height, screen_width, vec2, Color, Vec2},
+    prelude::{draw_poly, draw_poly_lines, screen_height, screen_width, vec2, Color, Vec2},
 };
 use rand::Rng;
 
@@ -12,6 +12,7 @@ pub struct Ball {
     radius: f32,
     sides: u8,
     color: Color,
+    fill: bool,
 }
 
 impl Ball {
@@ -24,6 +25,7 @@ impl Ball {
             radius,
             sides: (radius / 2.0).clamp(20.0, 255.0) as u8,
             color,
+            fill: false,
         }
     }
 
@@ -49,11 +51,14 @@ impl Ball {
     fn handle_bound_collision(&mut self) {
         let max_x = screen_width() - self.radius;
         let max_y = screen_height() - self.radius;
+        self.fill = false;
         if self.x < self.radius || self.x > max_x {
             self.velocity.x = -self.velocity.x;
+            self.fill = true;
         }
         if self.y < self.radius || self.y > max_y {
             self.velocity.y = -self.velocity.y;
+            self.fill = true;
         }
     }
 
@@ -64,8 +69,11 @@ impl Ball {
             self.sides,
             self.radius,
             0.0,
-            1.0,
+            2.0,
             self.color,
         );
+        if self.fill {
+            draw_poly(self.x, self.y, self.sides, self.radius, 0.0, self.color);
+        }
     }
 }
