@@ -14,7 +14,7 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let mut balls = vec![];
+    let mut balls: Vec<Ball> = vec![];
     let mut sw = screen_width();
     let mut sh = screen_height();
     let mut last_render_time = get_time();
@@ -23,7 +23,15 @@ async fn main() {
         last_render_time = get_time();
 
         if screen_width().ne(&sw) || screen_height().ne(&sh) || balls.len() == 0 {
-            balls = (0..5).map(|_| Ball::new_random()).collect();
+            balls.clear();
+            for _ in 0..5 {
+                balls.push(loop {
+                    let new_ball = Ball::new_random();
+                    if !balls.iter().any(|ball| ball.collide_with(&new_ball)) {
+                        break new_ball;
+                    }
+                });
+            }
             sw = screen_width();
             sh = screen_height();
         }
