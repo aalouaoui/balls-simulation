@@ -67,8 +67,18 @@ impl Ball {
         for i in 0..balls.len() - 1 {
             for j in i + 1..balls.len() {
                 if balls[i].collide_with(&balls[j]) {
+                    let vel_i = vec2(
+                         balls[j].velocity.x * balls[j].radius / balls[i].radius,
+                         balls[j].velocity.y * balls[j].radius / balls[i].radius,
+                    );
+                    let vel_j = vec2(
+                         balls[i].velocity.x * balls[i].radius / balls[j].radius,
+                         balls[i].velocity.y * balls[i].radius / balls[j].radius,
+                    );
                     balls[i].fill = true;
+                    balls[i].velocity = vel_i;
                     balls[j].fill = true;
+                    balls[j].velocity = vel_j;
                 }
             }
         }
