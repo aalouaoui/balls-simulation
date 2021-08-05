@@ -5,8 +5,7 @@ use macroquad::{
 use rand::Rng;
 
 pub struct Ball {
-    x: f32,
-    y: f32,
+    pos: Vec2,
     velocity: Vec2,
     acceleration: Vec2,
     radius: f32,
@@ -18,8 +17,7 @@ pub struct Ball {
 impl Ball {
     pub fn new(pos: Vec2, radius: f32, color: Color) -> Self {
         Ball {
-            x: pos.x,
-            y: pos.y,
+            pos,
             velocity: vec2(200.0, -300.0),
             acceleration: vec2(0.0, 50.0),
             radius,
@@ -39,27 +37,24 @@ impl Ball {
     }
 
     pub fn update(&mut self, dt: f32) {
-        self.x += self.velocity.x * dt;
-        self.y += self.velocity.y * dt;
-
-        self.velocity.x += self.acceleration.x * dt;
-        self.velocity.y += self.acceleration.y * dt;
+        self.pos += self.velocity * dt;
+        self.velocity += self.acceleration * dt;
         self.handle_bound_collision();
     }
 
     fn handle_bound_collision(&mut self) {
         let max_x = screen_width() - self.radius;
         let max_y = screen_height() - self.radius;
-        if self.x < self.radius || self.x > max_x {
+        if self.pos.x < self.radius || self.pos.x > max_x {
             self.velocity.x = -self.velocity.x;
         }
-        if self.y < self.radius || self.y > max_y {
+        if self.pos.y < self.radius || self.pos.y > max_y {
             self.velocity.y = -self.velocity.y;
         }
     }
 
     pub fn collide_with(&self, other: &Self) -> bool {
-        vec2(self.x, self.y).distance(vec2(other.x, other.y)) < self.radius + other.radius
+        self.pos.distance(other.pos) < self.radius + other.radius
     }
 
     pub fn handle_balls_collision(balls: &mut Vec<Ball>) {
@@ -76,8 +71,8 @@ impl Ball {
 
     pub fn draw(&self) {
         draw_poly_lines(
-            self.x,
-            self.y,
+            self.pos.x,
+            self.pos.y,
             self.sides,
             self.radius,
             0.0,
@@ -85,7 +80,14 @@ impl Ball {
             self.color,
         );
         if self.fill {
-            draw_poly(self.x, self.y, self.sides, self.radius, 0.0, self.color);
+            draw_poly(
+                self.pos.x,
+                self.pos.y,
+                self.sides,
+                self.radius,
+                0.0,
+                self.color,
+            );
         }
     }
 }
