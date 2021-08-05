@@ -45,16 +45,20 @@ impl Ball {
     fn handle_bound_collision(&mut self) {
         let max_x = screen_width() - self.radius;
         let max_y = screen_height() - self.radius;
-        if self.pos.x < self.radius || self.pos.x > max_x {
+        if self.pos.x <= self.radius || self.pos.x >= max_x {
             self.velocity.x = -self.velocity.x;
         }
-        if self.pos.y < self.radius || self.pos.y > max_y {
+        if self.pos.y <= self.radius || self.pos.y >= max_y {
             self.velocity.y = -self.velocity.y;
         }
     }
 
     pub fn collide_with(&self, other: &Self) -> bool {
-        self.pos.distance(other.pos) < self.radius + other.radius
+        self.pos.distance(other.pos) <= self.radius + other.radius
+    }
+
+    fn get_inv_mass(&self) -> f32 {
+        1.0 / self.radius
     }
 
     pub fn handle_balls_collision(balls: &mut Vec<Ball>) {
@@ -64,6 +68,27 @@ impl Ball {
                 if balls[i].collide_with(&balls[j]) {
                     balls[i].fill = true;
                     balls[j].fill = true;
+
+                    // Stolen from
+                    // https://github.com/danielszabo88/mocorgo/blob/master/09%20-%20Mass%20and%20Elasticity/script.js
+                    let normal = (balls[i].pos - balls[j].pos).normalize();
+                    let rel_vel = balls[i].velocity - balls[j].velocity;
+                    let sep_vec = rel_vel.dot(normal);
+                    let new_sep_vel = -sep_vec;
+
+                    //the difference between the new and the original sep.velocity value
+                    let sep_vel_diff = new_sep_vel - sep_vec;
+
+                    //dividing the impulse value in the ration of the inverse masses
+                    //and adding the impulse vector to the original vel. vectors
+                    //according to their inverse mass
+                    let inv_mass_i = balls[i].get_inv_mass();
+                    let inv_mass_j = balls[j].get_inv_mass();
+                    let impulse = sep_vel_diff / (inv_mass_i + inv_mass_j);
+                    let impulse_vec = normal * impulse;
+
+                    balls[i].velocity += impulse_vec * inv_mass_i;
+                    balls[j].velocity -= impulse_vec * inv_mass_j;
                 }
             }
         }
