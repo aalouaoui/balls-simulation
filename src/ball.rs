@@ -45,11 +45,19 @@ impl Ball {
     fn handle_bound_collision(&mut self) {
         let max_x = screen_width() - self.radius;
         let max_y = screen_height() - self.radius;
-        if self.pos.x <= self.radius || self.pos.x >= max_x {
+        if self.pos.x <= self.radius {
             self.velocity.x = -self.velocity.x;
+            self.pos.x = self.radius + 1.0;
+        } else if self.pos.x >= max_x {
+            self.velocity.x = -self.velocity.x;
+            self.pos.x = max_x - 1.0;
         }
-        if self.pos.y <= self.radius || self.pos.y >= max_y {
+        if self.pos.y <= self.radius {
             self.velocity.y = -self.velocity.y;
+            self.pos.y = self.radius + 1.0;
+        } else if self.pos.y >= max_y {
+            self.velocity.y = -self.velocity.y;
+            self.pos.y = max_y - 1.0;
         }
     }
 

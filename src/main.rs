@@ -24,7 +24,7 @@ async fn main() {
 
         if screen_width().ne(&sw) || screen_height().ne(&sh) || balls.len() == 0 {
             balls.clear();
-            for _ in 0..5 {
+            for _ in 0..10 {
                 balls.push(loop {
                     let new_ball = Ball::new_random();
                     if !balls.iter().any(|ball| ball.collide_with(&new_ball)) {
