@@ -22,7 +22,7 @@ async fn main() {
         let dt = get_frame_time();
         if screen_width().ne(&sw) || screen_height().ne(&sh) || balls.len() == 0 {
             balls.clear();
-            for _ in 0..20 {
+            'outer: for _ in 0..60 {
                 let mut counter = 0;
                 balls.push(loop {
                     let new_ball = Ball::new_random();
@@ -30,7 +30,10 @@ async fn main() {
                         break new_ball;
                     }
                     counter += 1;
-                    assert!(counter < 100);
+                    if counter > 1000 {
+                        println!("{}", balls.len());
+                        break 'outer;
+                    }
                 });
             }
             sw = screen_width();

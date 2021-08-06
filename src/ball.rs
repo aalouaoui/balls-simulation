@@ -79,8 +79,8 @@ impl Ball {
             for j in i + 1..balls.len() {
                 let distance = balls[i].outer_distance(&balls[j]);
                 if balls[i].collide_with(&balls[j]) {
-                    balls[i].fill = true;
-                    balls[j].fill = true;
+                    // balls[i].fill = true;
+                    // balls[j].fill = true;
 
                     let normal = (balls[i].pos - balls[j].pos).normalize();
 
