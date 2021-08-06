@@ -17,12 +17,9 @@ async fn main() {
     let mut balls: Vec<Ball> = vec![];
     let mut sw = screen_width();
     let mut sh = screen_height();
-    let mut last_render_time = get_time();
 
     loop {
-        let dt = (get_time() - last_render_time) as f32;
-        last_render_time = get_time();
-
+        let dt = get_frame_time();
         if screen_width().ne(&sw) || screen_height().ne(&sh) || balls.len() == 0 {
             balls.clear();
             for _ in 0..20 {
