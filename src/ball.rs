@@ -61,8 +61,12 @@ impl Ball {
         }
     }
 
+    pub fn outer_distance(&self, other: &Self) -> f32 {
+        self.pos.distance(other.pos) - self.radius - other.radius
+    }
+
     pub fn collide_with(&self, other: &Self) -> bool {
-        self.pos.distance(other.pos) <= self.radius + other.radius
+        self.outer_distance(other) <= 0.0
     }
 
     fn get_inv_mass(&self) -> f32 {
@@ -73,13 +77,19 @@ impl Ball {
         balls.iter_mut().for_each(|ball| ball.fill = false);
         for i in 0..balls.len() - 1 {
             for j in i + 1..balls.len() {
+                let distance = balls[i].outer_distance(&balls[j]);
                 if balls[i].collide_with(&balls[j]) {
                     balls[i].fill = true;
                     balls[j].fill = true;
 
+                    let normal = (balls[i].pos - balls[j].pos).normalize();
+
+                    // Cheap trick to prevent balls from getting stuck on collision
+                    balls[i].pos -= 0.5 * distance * normal;
+                    balls[j].pos += 0.5 * distance * normal;
+
                     // Stolen from
                     // https://github.com/danielszabo88/mocorgo/blob/master/09%20-%20Mass%20and%20Elasticity/script.js
-                    let normal = (balls[i].pos - balls[j].pos).normalize();
                     let rel_vel = balls[i].velocity - balls[j].velocity;
                     let sep_vec = rel_vel.dot(normal);
                     let new_sep_vel = -sep_vec;
