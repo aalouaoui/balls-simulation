@@ -1,6 +1,6 @@
 use macroquad::{
     color::hsl_to_rgb,
-    prelude::{draw_poly, draw_poly_lines, screen_height, screen_width, vec2, Color, Vec2},
+    prelude::{draw_poly_lines, screen_height, screen_width, vec2, Color, Vec2},
 };
 use rand::Rng;
 
@@ -11,7 +11,6 @@ pub struct Ball {
     radius: f32,
     sides: u8,
     color: Color,
-    fill: bool,
 }
 
 impl Ball {
@@ -23,7 +22,6 @@ impl Ball {
             radius,
             sides: (radius / 2.0).clamp(20.0, 255.0) as u8,
             color,
-            fill: false,
         }
     }
 
@@ -74,11 +72,21 @@ impl Ball {
     }
 
     pub fn handle_balls_collision(balls: &mut Vec<Ball>) {
-        balls.iter_mut().for_each(|ball| ball.fill = false);
-        for i in 0..balls.len() - 1 {
-            for j in i + 1..balls.len() {
-                Ball::check_and_resolve_collision(balls, i, j);
+        balls.sort_by(|ball1, ball2| {
+            (ball1.pos.x - ball1.radius)
+                .partial_cmp(&(ball2.pos.x - ball2.radius))
+                .unwrap()
+        });
+        let mut active_range: Vec<usize> = Vec::new();
+        for i in 0..balls.len() {
+            active_range
+                .retain(|&j| balls[j].pos.x + balls[j].radius >= balls[i].pos.x - balls[i].radius);
+            if active_range.len() > 0 {
+                active_range.iter().for_each(|&j| {
+                    Ball::check_and_resolve_collision(balls, i, j);
+                });
             }
+            active_range.push(i);
         }
     }
 
@@ -115,15 +123,5 @@ impl Ball {
             2.0,
             self.color,
         );
-        if self.fill {
-            draw_poly(
-                self.pos.x,
-                self.pos.y,
-                self.sides,
-                self.radius,
-                0.0,
-                self.color,
-            );
-        }
     }
 }

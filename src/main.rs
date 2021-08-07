@@ -31,7 +31,6 @@ async fn main() {
                     }
                     counter += 1;
                     if counter > 1000 {
-                        println!("{}", balls.len());
                         break 'outer;
                     }
                 });
