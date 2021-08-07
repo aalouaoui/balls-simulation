@@ -77,30 +77,32 @@ impl Ball {
         balls.iter_mut().for_each(|ball| ball.fill = false);
         for i in 0..balls.len() - 1 {
             for j in i + 1..balls.len() {
-                let distance = balls[i].outer_distance(&balls[j]);
-                if balls[i].collide_with(&balls[j]) {
-                    // balls[i].fill = true;
-                    // balls[j].fill = true;
-
-                    let normal = (balls[i].pos - balls[j].pos).normalize();
-
-                    // Cheap trick to prevent balls from getting stuck on collision
-                    balls[i].pos -= 0.5 * distance * normal;
-                    balls[j].pos += 0.5 * distance * normal;
-
-                    // Stolen from
-                    // https://github.com/danielszabo88/mocorgo/blob/master/09%20-%20Mass%20and%20Elasticity/script.js
-                    let inv_mass_i = balls[i].get_inv_mass();
-                    let inv_mass_j = balls[j].get_inv_mass();
-
-                    let sep_vec = (balls[i].velocity - balls[j].velocity).dot(normal) * normal;
-                    let impulse_vec = 2.0 * sep_vec / (inv_mass_i + inv_mass_j);
-
-                    balls[i].velocity -= impulse_vec * inv_mass_i;
-                    balls[j].velocity += impulse_vec * inv_mass_j;
-                }
+                Ball::check_and_resolve_collision(balls, i, j);
             }
         }
+    }
+
+    pub fn check_and_resolve_collision(balls: &mut Vec<Ball>, i: usize, j: usize) {
+        if !balls[i].collide_with(&balls[j]) {
+            return;
+        }
+        let distance = balls[i].outer_distance(&balls[j]);
+        let normal = (balls[i].pos - balls[j].pos).normalize();
+
+        // Cheap trick to prevent balls from getting stuck on collision
+        balls[i].pos -= 0.5 * distance * normal;
+        balls[j].pos += 0.5 * distance * normal;
+
+        // Stolen from
+        // https://github.com/danielszabo88/mocorgo/blob/master/09%20-%20Mass%20and%20Elasticity/script.js
+        let inv_mass_i = balls[i].get_inv_mass();
+        let inv_mass_j = balls[j].get_inv_mass();
+
+        let sep_vec = (balls[i].velocity - balls[j].velocity).dot(normal) * normal;
+        let impulse_vec = 2.0 * sep_vec / (inv_mass_i + inv_mass_j);
+
+        balls[i].velocity -= impulse_vec * inv_mass_i;
+        balls[j].velocity += impulse_vec * inv_mass_j;
     }
 
     pub fn draw(&self) {
