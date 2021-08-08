@@ -14,11 +14,11 @@ pub struct Ball {
 }
 
 impl Ball {
-    pub fn new(pos: Vec2, radius: f32, color: Color) -> Self {
+    pub fn new(pos: Vec2, radius: f32, velocity: Vec2, color: Color) -> Self {
         Ball {
             pos,
-            velocity: vec2(200.0, -300.0),
-            acceleration: vec2(0.0, 50.0),
+            velocity,
+            acceleration: vec2(0.0, radius),
             radius,
             sides: (radius / 2.0).clamp(20.0, 255.0) as u8,
             color,
@@ -27,11 +27,13 @@ impl Ball {
 
     pub fn new_random() -> Self {
         let mut rng = rand::thread_rng();
-        let radius = rng.gen_range(0.05..0.1) * screen_height().min(screen_width());
+        let radius = rng.gen_range(0.01..0.02) * screen_height().min(screen_width());
         let x = rng.gen_range(radius..screen_width() - radius);
         let y = rng.gen_range(radius..screen_height() - radius);
+        let vel_x = rng.gen_range(-100.0..100.0);
+        let vel_y = rng.gen_range(-100.0..100.0);
         let color = hsl_to_rgb(rng.gen_range(0.0..1.0), 0.5, 0.5);
-        Self::new(vec2(x, y), radius, color)
+        Self::new(vec2(x, y), radius, vec2(vel_x, vel_y), color)
     }
 
     pub fn update(&mut self, dt: f32) {
@@ -91,10 +93,10 @@ impl Ball {
     }
 
     pub fn check_and_resolve_collision(balls: &mut Vec<Ball>, i: usize, j: usize) {
-        if !balls[i].collide_with(&balls[j]) {
+        let distance = balls[i].outer_distance(&balls[j]);
+        if distance >= 0.0 {
             return;
         }
-        let distance = balls[i].outer_distance(&balls[j]);
         let normal = (balls[i].pos - balls[j].pos).normalize();
 
         // Cheap trick to prevent balls from getting stuck on collision
